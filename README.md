@@ -47,9 +47,7 @@ try:
         BertTokenizer,
         BertForSequenceClassification,
         GPT2Tokenizer,
-        GPT2LMHeadModel,
-        ViTFeatureExtractor,
-        ViTForImageClassification
+        GPT2LMHeadModel
     )
     print("Transformers OK")
 
