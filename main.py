@@ -13,6 +13,7 @@ PACKAGES = [
     "requests",
     "matplotlib",
     "scikit-learn",
+    "opencv-python",
 ]
 
 
@@ -192,6 +193,22 @@ def main():
         return f"train={len(x_train)}, test={len(x_test)}, labels={y_train + y_test}"
 
     checks.append(("Scikit-learn", sklearn_check))
+
+    def opencv_check():
+        import cv2
+
+        image = cv2.imread.__doc__
+        return f"version={cv2.__version__}, read_func_available={callable(cv2.imread)}"
+
+    checks.append(("OpenCV", opencv_check))
+
+    def os_check():
+        import os
+
+        cwd = os.getcwd()
+        return f"cwd={cwd}, sep={os.sep}, available_functions={len(dir(os))}"
+
+    checks.append(("OS (built-in)", os_check))
 
     results = {}
     for name, check_fn in checks:
