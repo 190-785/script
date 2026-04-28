@@ -1,0 +1,743 @@
+﻿Practical 1
+1.1:Design a ANN base system for the classification of the apple having two feature colors and weight (Binary Classification).
+import numpy as np
+# data --- > { apple colour , apple weight in gm}
+# green ---> 0
+# red ---> 1
+# yellow ---> 2
+X = np.array([
+    [0, 120],
+    [0, 130],
+    [1, 140],
+    [1, 150],
+    [2, 160],
+    [2, 170]
+])
+#Label
+y = np.array([0, 0, 0, 1, 1, 1])
+ 
+def step_function(x):
+    return 1 if x >= 0 else 0
+weights = np.random.randn(2)
+bias = 0.5
+learning_rate = 0.05
+epochs = 120
+ 
+for _ in range(epochs):
+    for i in range(len(X)):
+        linear_output = np.dot(X[i], weights) + bias
+        y_pred = step_function(linear_output)
+        error = y[i] - y_pred
+        weights += learning_rate * error * X[i]
+        bias += learning_rate * error
+ 
+print("Final Weights:", weights)
+print("Final Bias:", bias)
+def predict_apple(new_fruit):
+    linear_output = np.dot(new_fruit, weights) + bias
+    y_pred = step_function(linear_output)
+    return "Apple" if y_pred == 1 else "Not apple"
+ 
+apple = np.array([150, 8])  
+print(predict_apple(apple)) 
+
+
+
+1.2:Design a ANN base system for the classification of the apple having two feature colors and weight (Binary Classification).(normalization)
+
+import numpy as np
+class Perceptron:
+    def __init__(self, learning_rate=0.05, epochs=120):
+        self.eta = learning_rate
+        self.epochs = epochs
+        self.weights = np.random.randn(2)
+        self.bias = 0.5
+ 
+    def sigmoid(self, x):
+        return 1 / (1 + np.exp(-x))
+       
+    def fit(self, X, y):
+        for _ in range(self.epochs):
+            for i in range(len(X)):
+                linear_output = np.dot(X[i], self.weights) + self.bias
+                y_pred = self.sigmoid(linear_output)
+ 
+                error = y[i] - y_pred
+                self.weights += self.eta * error * X[i]
+                self.bias += self.eta * error
+        return self
+ 
+    def predict(self, new_fruit):
+        linear_output = np.dot(new_fruit, self.weights) + self.bias
+        y_pred = self.sigmoid(linear_output)
+        return "Apple" if y_pred >= 0.5 else "Not apple"
+ 
+X = np.array([
+    [0, 120/200], [0, 130/200], [1, 140/200],
+    [1, 150/200], [2, 160/200], [2, 170/200]
+])
+ 
+# 0 = Not apple & 1 = apple
+y = np.array([0, 0, 0, 1, 1, 1])
+ 
+model = Perceptron(learning_rate=0.1, epochs=500)
+model.fit(X, y)
+ 
+test_fruit = np.array([2, 150/200])
+print(f"Prediction: {model.predict(test_fruit)}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PRACTICAL-2
+2.1: Demonstrate a very simple RNN that takes 2 sequences of numbers (1 feature per time step) and produces a single numeric output without any training.
+
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import SimpleRNN, Dense
+
+1. Input sequences (2 sequences(hidden nodes), 3-time steps each, 1 feature)
+X = np.array([
+    [[1], [2], [3]],   sequence 1
+    [[2], [3], [4]]    sequence 2
+])
+
+2. Build RNN model
+model = Sequential()
+model.add(SimpleRNN(2, input_shape=(3, 1)))  2 hidden neurons
+model.add(Dense(1))  output layer
+
+3. No compilation or training — just forward pass
+predictions = model.predict(X)
+
+4. Print predictions (random because weights are not trained)
+print("Input sequences:\n", X.reshape(2, 3))
+print("Predicted outputs (random):\n", predictions)
+
+
+2.2: Train a very simple RNN that takes 2 sequences of numbers (1 feature per time step) and produces a single numeric output without any training.
+
+
+Import libraries
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import SimpleRNN, Dense
+
+1. Input sequences (2 sequences, 3-time steps, 1 feature)
+X = np.array([
+    [[1], [2], [3]],
+    [[2], [3], [4]]
+])
+
+2. Target outputs
+y = np.array([
+    [6],   target for sequence 1
+    [9]  target for sequence 2
+])
+
+3. Build RNN model
+model = Sequential()
+model.add(SimpleRNN(2, input_shape=(3, 1)))   2 hidden neurons
+model.add(Dense(1))  output neuron
+
+4. Compile model (training setup)
+model.compile(
+    optimizer='adam',    updates weights
+    loss='mse'          measures error
+)
+
+ 5. Train model
+model.fit(X, y, epochs=500, verbose=0)
+
+ 6. Test predictions
+predictions = model.predict(X)
+
+print("Predictions after training:")
+print(predictions)
+
+
+
+
+
+
+
+
+
+2.3 Predict the next number in a sequence (sequence learning).
+
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import SimpleRNN, Dense
+# Input sequences (X) and targets (y)
+X = np.array([
+    [1, 2, 3],
+    [2, 3, 4],
+    [3, 4, 5],
+    [4, 5, 6]
+])
+
+y = np.array([4, 5, 6, 7])
+
+# Reshape for RNN: (samples, timesteps, features)
+X = X.reshape((X.shape[0], X.shape[1], 1))
+
+model = Sequential()
+model.add(SimpleRNN(10, activation='tanh', input_shape=(3, 1)))
+model.add(Dense(1))
+model.compile(
+    optimizer='adam',
+    loss='mean_squared_error'
+)
+model.fit(X, y, epochs=200, verbose=1)
+# Test input
+test_input = np.array([[5, 6, 7]])
+test_input = test_input.reshape((1, 3, 1))
+
+prediction = model.predict(test_input)
+print("Predicted value:", prediction)
+
+
+
+
+
+2.4SENTIMENT ANALYSIS FOR THREE MOVIE REVIEWS
+Movie was good
+Movie was bad
+Movie is not good
+gIn two classes [0,1]
+
+
+
+
+PRACTICAL 3: LSTM IMPLEMENTATION
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense
+Input sequences (X)
+X = np.array([
+    [1, 2, 3],
+    [2, 3, 4],
+    [3, 4, 5],
+    [4, 5, 6]
+])
+Output values (y)
+y = np.array([4, 5, 6, 7])
+LSTM requires input in the form (samples, time_steps, features)
+X = X.reshape((X.shape[0], X.shape[1], 1))
+ Build the LSTM model
+model = Sequential()
+model.add(LSTM(50, activation='relu', input_shape=(3, 1)))
+model.add(Dense(1))
+Compile the model
+model.compile(optimizer='adam', loss='mse')
+ Train the model
+model.fit(X, y, epochs=300, verbose=0)
+
+
+ Prepare test input
+test_input = np.array([[5, 6, 7]])
+test_input = test_input.reshape((1, 3, 1))
+Make prediction using trained model
+prediction = model.predict(test_input)
+print("Predicted value:", prediction)
+
+
+3.2 FOR SENTIMENT ANALYSIS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PRACTICAL 4.1: GRU IMPLEMENTATION FOR SEQUENCE PREDICTION
+
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import GRU, Dense
+
+simple sequence
+X = np.array([
+    [1, 2, 3],
+    [2, 3, 4],
+    [3, 4, 5],
+    [4, 5, 6]
+], dtype=float)
+y = np.array([4, 5, 6, 7], dtype=float)
+reshape for GRU
+X = X.reshape((X.shape[0], X.shape[1], 1))
+model
+model = Sequential()
+model.add(GRU(10, input_shape=(3, 1)))
+model.add(Dense(1))
+model.compile(optimizer='adam', loss='mse')
+train
+model.fit(X, y, epochs=300, verbose=0)
+predict
+print(model.predict(X))
+
+
+4.2: GRU FOR SENTIMENT ANALYSIS:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5.1: ENCODER DECODER (SEQUENCE GENERATOR)
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+SEQ_LEN = 4
+HIDDEN = 16
+EPOCHS = 100
+
+Simple layers
+encoder = nn.GRU(1, HIDDEN, batch_first=True)
+decoder = nn.GRU(1, HIDDEN, batch_first=True)
+fc = nn.Linear(HIDDEN, 1)
+
+params = list(encoder.parameters()) + list(decoder.parameters()) + list(fc.parameters())
+optimizer = optim.Adam(params, lr=0.01)
+loss_fn = nn.MSELoss()
+
+Make tiny dataset
+def get_data(batch=8):
+    x = torch.rand(batch, SEQ_LEN, 1)
+    y = torch.flip(x, [1])  
+    return x, y
+
+Forward function (encoder → decoder)
+def forward(src):
+
+     Encoder: get final hidden state
+    hidden = encoder(src)
+
+    Decoder start with zeros
+    inp = torch.zeros(src.size(0), 1, 1)
+
+    outputs = []
+
+Predict step‑by‑step
+    for _ in range(SEQ_LEN):
+        out, hidden = decoder(inp, hidden)
+        out = fc(out)
+        outputs.append(out)
+        inp = out feed prediction again
+
+    return torch.cat(outputs, dim=1)
+
+Training loop (very small)
+for e in range(EPOCHS):
+    x, y = get_data()
+
+    pred = forward(x)
+    loss = loss_fn(pred, y)
+
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+    if (e+1) % 20 == 0:
+        print("Epoch", e+1, "Loss", round(loss.item(), 4))
+
+Test on one example
+x, y = get_data(1)
+p = forward(x)
+
+print("\nInput:     ", x.squeeze().numpy())
+print("Target:    ", y.squeeze().numpy())
+print("Predicted: ", p.detach().squeeze().numpy())
+
+PRACTICAL 6.1: SELF-ATTENTION
+
+import numpy as np
+X = np.array([
+    [1, 0, 1, 0],
+    [0, 2, 0, 2],
+    [1, 1, 1, 1]
+])
+Wq = np.random.rand(4,4)
+Wk = np.random.rand(4,4)
+Wv = np.random.rand(4,4)
+Step 1: Create Query, Key, Value matrices
+Q = np.dot(X, Wq)
+K = np.dot(X, Wk)
+V = np.dot(X, Wv)
+Step 2: Calculate Attention Scores
+scores = np.dot(Q, K.T)
+Step 3: Scale scores
+dk = K.shape[1]
+scaled_scores = scores / np.sqrt(dk)
+Step 4: Softmax function
+def softmax(x):
+    exp_x = np.exp(x - np.max(x))
+    return exp_x / exp_x.sum(axis=-1, keepdims=True)
+attention_weights = softmax(scaled_scores)
+Step 5: Final output
+output = np.dot(attention_weights, V)
+
+print("Query Matrix:\n", Q)
+print("Key Matrix:\n", K)
+print("Value Matrix:\n", V)
+print("Attention Weights:\n", attention_weights)
+print("Self Attention Output:\n", output)
+
+
+
+PRACTICAL 6.2: SELF ATTENTION FOR SENETENCE
+PRACTICAL 6.3: MULTI-HEAD ATTENTION 
+import numpy as np
+Input sequence (3 tokens, embedding dimension = 4)
+X = np.array([
+    [1,0,1,0],
+    [0,2,0,2],
+    [1,1,1,1]
+])
+Parameters
+d_model = 4
+num_heads = 2
+d_k = d_model // num_heads
+Weight matrices
+WQ = np.random.rand(d_model, d_model)
+WK = np.random.rand(d_model, d_model)
+WV = np.random.rand(d_model, d_model)
+WO = np.random.rand(d_model, d_model)
+Step 1: Linear projections
+Q = np.dot(X, WQ)
+K = np.dot(X, WK)
+V = np.dot(X, WV)
+Step 2: Split into multiple heads
+def split_heads(X, num_heads):
+    return X.reshape(X.shape[0], num_heads, d_k)
+Q_heads = split_heads(Q, num_heads)
+K_heads = split_heads(K, num_heads)
+V_heads = split_heads(V, num_heads)
+Softmax function
+def softmax(x):
+    exp_x = np.exp(x - np.max(x))
+    return exp_x / exp_x.sum(axis=-1, keepdims=True)
+
+heads_output = []
+Step 3: Attention for each head
+for i in range(num_heads):
+   Qh = Q_heads[:,i,:]
+    Kh = K_heads[:,i,:]
+    Vh = V_heads[:,i,:]
+    scores = np.dot(Qh, Kh.T)
+    scaled_scores = scores / np.sqrt(d_k)
+    attention_weights = softmax(scaled_scores)
+    head_output = np.dot(attention_weights, Vh)
+    heads_output.append(head_output)
+Step 4: Concatenate heads
+concat_heads = np.concatenate(heads_output, axis=1)
+Step 5: Final linear projection
+output = np.dot(concat_heads, WO)
+print("Multi Head Attention Output:\n", output)
+
+
+
+
+
+
+
+
+PRACTICAL 7: POSITIONAL ENCODING
+
+import torch
+import math
+import torch.nn as nn
+Step 1: Input sentence
+sentence = ["I", "love", "AI"]
+Vocabulary mapping
+vocab = {"I":0, "love":1, "AI":2}
+indices = [vocab[word] for word in sentence]
+Convert to tensor
+input_tensor = torch.tensor(indices).unsqueeze(0)  
+shape: (1, seq_len)
+Step 2: Embedding
+d_model = 8
+embedding = nn.Embedding(num_embeddings=10, embedding_dim=d_model)
+embedded = embedding(input_tensor)
+print("Word Embeddings:\n", embedded)
+Step 3: Positional Encoding
+seq_len = input_tensor.size(1)
+Create positional encoding matrix
+pe = torch.zeros(seq_len, d_model)
+position = torch.arange(0, seq_len).unsqueeze(1)
+div_term = torch.exp(
+    torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model)
+)
+pe[:, 0::2] = torch.sin(position * div_term)
+pe[:, 1::2] = torch.cos(position * div_term)
+
+Add batch dimension
+pe = pe.unsqueeze(0)  # (1, seq_len, d_model)
+print("\nPositional Encoding:\n", pe)
+Step 4: Add PE to embeddings
+output = embedded + pe
+print("\nFinal Output (Embedding + PE):\n", output)
+
+
+
+SOLUTION: 
+
+PE(pos,2i)=sin(pos/100002i/dmodel​​),
+PE(pos,2i+1)=cos(pos/100002i/dmodel​)
+
+
+Inside sine/cosine:
+
+ Rewrite it as multiplication:
+
+
+We use identity:
+
+So:
+
+
+Take reciprocal
+
+
+Rearrange
+
+
+Index=torch.arange(0, d_model, 2)
+gives:
+[0, 2, 4, 6] = 2i
+
+Constant=(-math.log(10000.0) / d_model)
+gives:
+- log(10000) / d_model
+
+index * constant
+ gives:
+(2i) * (-log(10000)/d_model)
+(2i)*(− ​log(10000)​=−89.2103​≈−1.1513)
+torch.exp(...)
+gives:
+div_term = exp(index * (-log(10000) / d_model))
+Which equals:
+
+Solution:Compute div_term
+Multiply:
+2i*(1.1513)
+[0, 2, 4, 6] * (-1.1513)= [0, -2.3026, -4.6052, -6.9078]
+Now apply exp:
+exp(0)        = 1exp(-2.3026)  ≈ 0.1exp(-4.6052)  ≈ 0.01exp(-6.9078)  ≈ 0.001
+div_term = [1, 0.1, 0.01, 0.001]
+position =[[0],[1],[2]]
+position * div_term =[[0, 0, 0, 0],[1, 0.1, 0.01, 0.001],[2, 0.2, 0.02, 0.002]]
+
+Apply SIN (even indices: 0,2,4,6)
+Compute:
+sin(0) = 0 
+sin(1) ≈ 0.84 
+sin(2) ≈ 0.91 
+sin(0.1) ≈ 0.0998 
+sin(0.2) ≈ 0.1987 
+sin(0.01) ≈ 0.01 
+sin(0.02) ≈ 0.02 
+sin(0.001) ≈ 0.001 
+sin(0.002) ≈ 0.002
+pe =[[0, 0, 0, 0, 0, 0, 0, 0],[0.84, 0, 0.0998,0, 0.01, 0, 0.001, 0],[0.91, 0, 0.1987,0, 0.02, 0, 0.002, 0]]
+Step 7: Apply COS (odd indices: 1,3,5,7)
+Compute:
+cos(0) = 1 
+cos(1) ≈ 0.54 
+cos(2) ≈ -0.42 
+cos(0.1) ≈ 0.995 
+cos(0.2) ≈ 0.98 
+cos(0.01) ≈ 0.9999 
+cos(0.02) ≈ 0.9998 
+cos(0.001) ≈ 0.999999 
+cos(0.002) ≈ 0.999998 
+
+ Final Positional Encoding Matrix
+pe =[[0,    1,     0,     1,     0,     1,     0,      1], [0.84, 0.54,  0.0998,0.995, 0.01,  0.9999,0.001,  0.999999], [0.91, -0.42, 0.1987,0.98,  0.02,  0.9998,0.002,  0.999998]]
+combine sin+cos
+pe =[[0, 1, 0, 1, 0, 1, 0, 1],[0.84, 0.54, 0.0998,0.995, 0.01, 0.9999,0.001, 0.999999],[0.91, -0.42, 0.1987,0.98, 0.02, 0.9998,0.002, 0.999998]]
+
+
+
+
+
+PRACTICAL 8: MASKING 
+import torchimport torch.nn as nnimport math# ---- Hyperparameters ----vocab_size = 10000d_model = 256nhead = 8num_layers = 4seq_len = 10batch_size = 2# ---- Embedding + Positional Encoding ----embedding = nn.Embedding(vocab_size, d_model)def positional_encoding(seq_len, d_model):pe = torch.zeros(seq_len, d_model)position = torch.arange(0, seq_len).unsqueeze(1)div_term = torch.exp(torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))pe[:, 0::2] = torch.sin(position * div_term)pe[:, 1::2] = torch.cos(position * div_term)return pe # (seq_len, d_model)# ---- Mask (causal / future masking) ----def generate_mask(sz):mask = torch.triu(torch.ones(sz, sz))mask = mask.masked_fill(mask == 1, float('-inf'))return mask# ---- Transformer Decoder ----decoder_layer = nn.TransformerDecoderLayer(d_model=d_model, nhead=nhead)transformer_decoder = nn.TransformerDecoder(decoder_layer, num_layers=num_layers)# ---- Output Layer ----fc_out = nn.Linear(d_model, vocab_size)# ---- Forward Pass Function ----def forward(x):# x: (batch, seq_len)emb = embedding(x) * math.sqrt(d_model) # (batch, seq_len, d_model)pe = positional_encoding(seq_len, d_model).to(x.device)emb = emb + pe.unsqueeze(0)emb = emb.permute(1, 0, 2) # (seq_len, batch, d_model)mask = generate_mask(seq_len).to(x.device)# decoder-only trick (tgt = memory)out = transformer_decoder(emb, emb, tgt_mask=mask)out = out.permute(1, 0, 2) # (batch, seq_len, d_model)return fc_out(out)# ---- Example Run ----x = torch.randint(0, vocab_size, (batch_size, seq_len))y = forward(x)print(y.shape) # (batch_size, seq_len, vocab_size)
+
+PRACTICAL 9: Text Summarization using Transformer
+from transformers import pipeline
+# Load pre-trained summarization model
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+# Input text
+text = """
+Transformers are deep learning models introduced in the paper 'Attention is All You Need'.
+They are widely used in natural language processing tasks such as translation, summarization,
+and question answering. Pre-trained transformer models like BERT, GPT, and BART have achieved
+state-of-the-art performance by learning contextual relationships in text data.
+"""
+# Generate summary
+summary = summarizer(text, max_length=50, min_length=20, do_sample=False)
+# Print result
+print("Original Text:\n", text)
+print("\nSummary:\n", summary[0]['summary_text'])
+
+PRACTICAL 10: Sentiment Analysis using BERT
+from transformers import BertTokenizer, BertForSequenceClassification
+import torch
+#Load pre-trained BERT (fine-tuned for sentiment)
+model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
+tokenizer = BertTokenizer.from_pretrained(model_name)
+model = BertForSequenceClassification.from_pretrained(model_name)
+# Input text
+text = "I really enjoyed this movie!"
+# Tokenization (BERT step)
+inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+# Forward pass through BERT
+with torch.no_grad():
+    outputs = model(**inputs)
+# Get logits and prediction
+logits = outputs.logits
+predicted_class = torch.argmax(logits, dim=1).item()
+print("Predicted class:", predicted_class)
+
+
+
+
+
+
+
+
+PRACTICAL 11: IMAGE CLASSIFICATION USING ViT
+from transformers import ViTFeatureExtractor, ViTForImageClassification
+from PIL import Image
+import requests
+# Load pre-trained ViT model
+model = ViTForImageClassification.from_pretrained("google/vit-base-patch16-224")
+feature_extractor = ViTFeatureExtractor.from_pretrained("google/vit-base-patch16-224")
+# Load image from URL
+url = "https://images.unsplash.com/photo-1518791841217-8f162f1e1131"
+image = Image.open(requests.get(url, stream=True).raw)
+# Preprocess image
+inputs = feature_extractor(images=image, return_tensors="pt")
+# Prediction
+outputs = model(**inputs)
+logits = outputs.logits
+# Get predicted class
+predicted_class_idx = logits.argmax(-1).item()
+print("Predicted label:", model.config.id2label[predicted_class_idx])
+
+
+
+PRACTICAL 12: GPT FOR TEXT GENERATION
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
+import torch
+# Load GPT model and tokenizer
+model_name = "gpt2"
+tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+model = GPT2LMHeadModel.from_pretrained(model_name)
+# Input prompt
+prompt = "Artificial Intelligence is"
+# Convert text to tokens
+inputs = tokenizer(prompt, return_tensors="pt")
+# Generate text
+outputs = model.generate(
+    inputs["input_ids"],
+    max_length=50,
+    num_return_sequences=1,
+    no_repeat_ngram_size=2,
+    do_sample=True,
+    temperature=0.7
+)
+
+# Decode output tokens to text
+generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+print("Generated Text:\n", generated_text)
+
+
+PRACTICAL 12: LAYER NORMALIZATION
+import torch
+# sample input (batch_size, seq_len, d_model)
+x = torch.randn(2, 3, 4)
+eps = 1e-6
+# Step 1: compute mean
+mean = x.mean(dim=-1, keepdim=True)
+# Step 2: compute variance
+var = x.var(dim=-1, keepdim=True, unbiased=False)
+# Step 3: normalize
+x_norm = (x - mean) / torch.sqrt(var + eps)
+# Step 4: scale and shift (learnable params)
+gamma = torch.ones(x.size(-1))
+beta = torch.zeros(x.size(-1))
+output = gamma * x_norm + beta
+print(output)
+
+
+
+
+
+
+
